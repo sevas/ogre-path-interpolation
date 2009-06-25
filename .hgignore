@@ -1,0 +1,15 @@
+syntax:glob
+*.ncb
+*.pch
+*.ilk
+*.obj
+*.exe
+*.pdb
+*.htm
+*.manifest
+*.res
+*.idb
+*.user
+*.dep
+*.suo
+*.log
