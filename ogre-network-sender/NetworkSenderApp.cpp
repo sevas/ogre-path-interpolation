@@ -18,6 +18,7 @@ NetworkSenderApp::NetworkSenderApp(void)
 //------------------------------------------------------------------------------
 NetworkSenderApp::~NetworkSenderApp(void)
 {
+	mSocket->close();
 }
 //------------------------------------------------------------------------------
 bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
@@ -128,6 +129,8 @@ void NetworkSenderApp::createScene()
 
 	mAnimState = mSceneMgr->createAnimationState("bouncing ball");
 	mAnimState->setEnabled(1);
+
+	_initNetwork();
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_createAxes(int _nUnits)

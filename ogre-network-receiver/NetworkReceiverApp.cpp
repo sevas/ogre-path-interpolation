@@ -17,7 +17,7 @@ NetworkReceiverApp::NetworkReceiverApp(void)
 NetworkReceiverApp::~NetworkReceiverApp(void)
 {
 	mRunning = false;
-	mThread->join();
+	//mThread->join();
 }
 //------------------------------------------------------------------------------
 bool NetworkReceiverApp::frameStarted(const FrameEvent& evt)
