@@ -191,12 +191,12 @@ void NetworkReceiverApp::operator()()
 {
 	boost::asio::io_service io_service;
 
-	tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
+	mAcceptor = new tcp::acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
 	mRunning = true;
 	while (mRunning)
 	{
 		mSocket = new tcp::socket(io_service);
-		acceptor.accept(*mSocket);
+		mAcceptor->accept(*mSocket);
 
 
 		boost::system::error_code ignored_error;
@@ -223,6 +223,7 @@ void NetworkReceiverApp::operator()()
 
 			_readPosition();
 		}
+		
 	}
 }
 //------------------------------------------------------------------------------
@@ -234,10 +235,13 @@ void NetworkReceiverApp::_readPosition()
 	_readFloat(*mSocket, ec, position.y);
 	_readFloat(*mSocket, ec, position.z);
 
-	if (ec)
-		mConnected = false;
+	//if (ec)
+	//	mConnected = false;
 
-	mBallNode->setPosition(position);
+	if (position.distance(Vector3::ZERO) < 500)
+		mBallNode->setPosition(position);
+	else
+		mBallNode->setPosition(Vector3(0, 100, 0));
 
 }
 //------------------------------------------------------------------------------

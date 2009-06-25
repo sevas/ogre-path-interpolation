@@ -248,7 +248,7 @@ void NetworkSenderApp::_initNetwork()
 	tcp::resolver resolver(io_service);
 
 
-	tcp::resolver::query query("127.0.0.1", "8888");
+	tcp::resolver::query query("192.168.1.105", "8888");
 
 	tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 	tcp::resolver::iterator end;
