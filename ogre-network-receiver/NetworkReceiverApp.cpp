@@ -1,19 +1,27 @@
 #include "precompiled.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "NetworkReceiverApp.h"
 
 NetworkReceiverApp::NetworkReceiverApp(void)
 	:mAnimState2(NULL)
+	,mThread(0)
+	,mAcceptor(0)
+	,mSocket(0)
 {
+
 }
 //------------------------------------------------------------------------------
 NetworkReceiverApp::~NetworkReceiverApp(void)
 {
+	mRunning = false;
+	mThread->join();
 }
 //------------------------------------------------------------------------------
 bool NetworkReceiverApp::frameStarted(const FrameEvent& evt)
 {
-
 	if (mAnimState2)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
 	return true;
@@ -62,14 +70,9 @@ void NetworkReceiverApp::createScene()
 	mBallNode->attachObject(ent);
 	mBallNode->setScale(ws, ws, ws);
 
+	_startThread();
+
 }
-////------------------------------------------------------------------------------
-//void NetworkReceiverApp::createFrameListener()
-//{
-//	mFrameListener= new InputListener(mWindow, mCamera);
-//	mFrameListener->showDebugOverlay(true);
-//	mRoot->addFrameListener(mFrameListener);
-//}
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_createAxes(int _nUnits)
 {
@@ -177,6 +180,72 @@ void NetworkReceiverApp::_createLight()
 
 	mAnimState2 = mSceneMgr->createAnimationState("light track");
 	mAnimState2->setEnabled(1);
+}
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::_startThread()
+{
+	mThread = new boost::thread(boost::ref<NetworkReceiverApp>(*this));
+}
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::operator()()
+{
+	boost::asio::io_service io_service;
 
+	tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
+	mRunning = true;
+	while (mRunning)
+	{
+		mSocket = new tcp::socket(io_service);
+		acceptor.accept(*mSocket);
+
+
+		boost::system::error_code ignored_error;
+		mConnected = true;
+		
+		while (mConnected && mRunning)
+		{
+			//boost::array<char, 4> buf;
+			//boost::system::error_code ec;
+
+			//std::size_t n = mSocket->read_some(boost::asio::buffer(buf), ec);
+
+			//if (ec)
+			//{
+			//	mConnected = false;
+			//}
+			//else
+			//{
+			//	float x, y, z;
+			//	read_float(socket, ec, x);
+			//	read_float(socket, ec, y);
+			//	read_float(socket, ec, z);
+			//}
+
+			_readPosition();
+		}
+	}
+}
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::_readPosition()
+{
+	boost::system::error_code ec;
+	Vector3 position;
+	_readFloat(*mSocket, ec, position.x);
+	_readFloat(*mSocket, ec, position.y);
+	_readFloat(*mSocket, ec, position.z);
+
+	if (ec)
+		mConnected = false;
+
+	mBallNode->setPosition(position);
 
 }
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::_readFloat(tcp::socket&_socket, boost::system::error_code &_error, float &_val)
+{
+	boost::array<char, 4> buf;
+	std::size_t n = _socket.read_some(boost::asio::buffer(buf), _error);
+
+	memcpy(&_val, buf.c_array(), 4);
+}
+//------------------------------------------------------------------------------

@@ -2,9 +2,17 @@
 
 #include "NetworkSenderApp.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#include <boost/thread/xtime.hpp>
+
+
+
 NetworkSenderApp::NetworkSenderApp(void)
 	:mAnimState(NULL)
 	,mAnimState2(NULL)
+	,mSocket(0)
 {
 }
 //------------------------------------------------------------------------------
@@ -19,6 +27,11 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 
 	if (mAnimState2)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
+
+
+	mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+	_sendPosition();
+
 	return true;
 }
 //------------------------------------------------------------------------------
@@ -35,7 +48,7 @@ void NetworkSenderApp::createScene()
 	Viewport *vp = mWindow->getViewport(0);
 	vp->setBackgroundColour(ColourValue(0.7, 0.7, 0.7));
 
-	mRoot->addFrameListener(this);
+	mRoot->addFrameListener(this); 
 
 	_createAxes(5);
 	_createGrid(5);
@@ -147,8 +160,7 @@ void NetworkSenderApp::_createAxes(int _nUnits)
 
 	mGridNode->scale(scale, scale, scale);
 
-}
-//------------------------------------------------------------------------------
+}//------------------------------------------------------------------------------
 void NetworkSenderApp::_createGrid(int _nUnits)
 {
 	float step = 0.1;
@@ -226,3 +238,75 @@ void NetworkSenderApp::_createLight()
 
 
 }
+//------------------------------------------------------------------------------
+void NetworkSenderApp::_initNetwork()
+{
+	boost::asio::io_service io_service;
+	tcp::resolver resolver(io_service);
+
+
+	tcp::resolver::query query("127.0.0.1", "8888");
+
+	tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+	tcp::resolver::iterator end;
+
+	mSocket = new tcp::socket(io_service);
+	
+	mSocketError = boost::asio::error::host_not_found;
+
+	while (!mConnected)
+	{
+		while (mSocketError && endpoint_iterator != end)
+		{
+			mSocket->close();
+			mSocket->connect(*endpoint_iterator++, mSocketError);
+			_sleep(500);
+		}
+		if (mSocketError)
+			throw boost::system::system_error(mSocketError);
+	
+		mConnected = true;
+	}
+
+	mTimer.reset();
+}
+//------------------------------------------------------------------------------
+void NetworkSenderApp::_sendPosition()
+{
+	if(mConnected)
+	{
+		
+		if (mTimeSinceLastUpdate > 1./60)
+		{
+			Vector3 pos = mBallNode->_getDerivedPosition();
+			_sendFloat(pos.x);
+			_sendFloat(pos.y);
+			_sendFloat(pos.z);
+
+			mTimeSinceLastUpdate = 0;
+		}
+	}
+}
+//------------------------------------------------------------------------------
+void NetworkSenderApp::_sendFloat(float _val)
+{
+	char arr[4];
+	memcpy(arr, &_val, sizeof(_val));
+
+	int n = boost::asio::write((*mSocket)
+							  , boost::asio::buffer(arr, sizeof(_val))
+							  , boost::asio::transfer_all()
+							  , mSocketError);
+	mConnected = (n == 4);
+	
+}
+//------------------------------------------------------------------------------
+void NetworkSenderApp::_sleep(int _ms)
+{
+	// sleep 20ms
+	boost::xtime sleeptime;
+	boost::xtime_get(&sleeptime, boost::TIME_UTC);
+	sleeptime.nsec += 1000000 * _ms;
+	boost::thread::sleep(sleeptime);
+}
+//------------------------------------------------------------------------------

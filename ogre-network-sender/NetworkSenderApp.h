@@ -5,6 +5,7 @@
 #include <Ogre.h>
 #include <OIS/OIS.h>
 
+#include <boost/thread.hpp>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
@@ -29,8 +30,18 @@ protected:
 	void _createGrid(int);
 	void _createLight();
 
+	void _initNetwork();
+	void _sendPosition();
+	void _sendFloat(float);
+	void _sleep(int);
+
 protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
 	AnimationState *mAnimState, *mAnimState2;
 
+	tcp::socket *mSocket;
+	boost::system::error_code mSocketError;
+	bool mConnected;
+	Timer mTimer;
+	Real mTimeSinceLastUpdate;
 };
