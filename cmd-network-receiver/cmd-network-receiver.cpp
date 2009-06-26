@@ -35,7 +35,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			tcp::socket socket(io_service);
 			std::cout << "waiting client" << std::endl;
 			acceptor.accept(socket);
-
+			
 			std::cout << "got it" << std::endl;
 
 			boost::system::error_code ignored_error;
