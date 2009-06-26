@@ -258,19 +258,19 @@ void NetworkSenderApp::_initNetwork()
 	
 	mSocketError = boost::asio::error::host_not_found;
 
-	while (!mConnected)
+	//while (!mConnected)
+	//{
+	mConnected = false;
+	while (mSocketError && endpoint_iterator != end)
 	{
-		while (mSocketError && endpoint_iterator != end)
-		{
-			mSocket->close();
-			mSocket->connect(*endpoint_iterator++, mSocketError);
-			_sleep(500);
-		}
-		if (mSocketError)
-			throw boost::system::system_error(mSocketError);
-	
-		mConnected = true;
+		mSocket->close();
+		mSocket->connect(*endpoint_iterator++, mSocketError);
 	}
+	if (mSocketError)
+		throw boost::system::system_error(mSocketError);
+
+	mConnected = true;
+	//}
 
 	mTimer.reset();
 }
