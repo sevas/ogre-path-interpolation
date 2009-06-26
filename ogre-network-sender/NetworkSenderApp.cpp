@@ -257,6 +257,7 @@ void NetworkSenderApp::_initNetwork()
 	mSocket = new tcp::socket(io_service);
 	
 	mSocketError = boost::asio::error::host_not_found;
+    mConnected = false;
 
 	//while (!mConnected)
 	//{
@@ -265,6 +266,7 @@ void NetworkSenderApp::_initNetwork()
 	{
 		mSocket->close();
 		mSocket->connect(*endpoint_iterator++, mSocketError);
+
 	}
 	if (mSocketError)
 		throw boost::system::system_error(mSocketError);
@@ -282,7 +284,7 @@ void NetworkSenderApp::_sendPosition()
 		
 		if (mTimeSinceLastUpdate > 1./60)
 		{
-			Vector3 pos = mBallNode->_getDerivedPosition();
+			Vector3 pos = mBallNode->getPosition();
 			_sendFloat(pos.x);
 			_sendFloat(pos.y);
 			_sendFloat(pos.z);

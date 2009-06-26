@@ -27,6 +27,7 @@ void write_float(tcp::socket &_socket, boost::system::error_code& _error, float 
 
 int main(int argc, char* argv[])
 {
+    srand(time(NULL));
 	srand(time(NULL));
 	try
 	{
@@ -64,10 +65,10 @@ int main(int argc, char* argv[])
 		{        
 			write_float(socket, error, f);
 			write_float(socket, error, f);
-			write_float(socket, error, f);
+			write_float(socket, error, 0);
 
-			f+=1.0;
-			if(f>300)
+			f+=.5;
+			if(f>200)
 				f=0.0;
 			
 
