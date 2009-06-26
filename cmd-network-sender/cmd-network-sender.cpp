@@ -27,6 +27,7 @@ void write_float(tcp::socket &_socket, boost::system::error_code& _error, float 
 
 int main(int argc, char* argv[])
 {
+	srand(time(NULL));
 	try
 	{
 		boost::asio::io_service io_service;
@@ -58,10 +59,12 @@ int main(int argc, char* argv[])
 
 		for (;;)
 		{        
-
-			write_float(socket, error, f*10);
-			write_float(socket, error, f*10);
-			write_float(socket, error, f*10);
+			f = rand() % 100;
+			write_float(socket, error, f);
+			f = rand() % 100;
+			write_float(socket, error, f);
+			f = rand() % 100;
+			write_float(socket, error, f);
 
 
 			if (error == boost::asio::error::eof)
