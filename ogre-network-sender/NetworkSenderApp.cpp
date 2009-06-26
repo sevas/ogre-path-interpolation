@@ -13,7 +13,7 @@
 NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	:mAnimState(NULL)
 	,mAnimState2(NULL)
-	,mSocket(0)
+	,mUdpSocket(0)
 	,mIpAddress(_ipAddress)
 	,mConnected(0)
 {
@@ -250,36 +250,46 @@ void NetworkSenderApp::_createLight()
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_initNetwork()
 {
-	mNetworkLog = LogManager::getSingleton().createLog("network.log");
+	//mNetworkLog = LogManager::getSingleton().createLog("network.log");
 
-	//boost::asio::io_service io_service;
-	mResolver = new tcp::resolver(mIOService);
 
- 
-	mQuery = new tcp::resolver::query(mIpAddress, "8888");
+	//mResolver = new tcp::resolver(mIOService);
 
-	tcp::resolver::iterator endpoint_iterator = mResolver->resolve(*mQuery);
-	tcp::resolver::iterator end;
+ //
+	//mQuery = new tcp::resolver::query(mIpAddress, "8888");
 
-	mSocket = new tcp::socket(mIOService);
+	//tcp::resolver::iterator endpoint_iterator = mResolver->resolve(*mQuery);
+	//tcp::resolver::iterator end;
+
+	//mSocket = new tcp::socket(mIOService);
+	//
+
+	//mSocketError = boost::asio::error::host_not_found;
+ //   mConnected = false;
+
+	//while (mSocketError && endpoint_iterator != end)
+	//{
+	//	mNetworkLog->logMessage("trying to connect to "+mIpAddress+":"+"8888");
+	//	mSocket->close();
+	//	mSocket->connect(*endpoint_iterator++, mSocketError);
+	//}
+	//if (mSocketError)
+	//	throw boost::system::system_error(mSocketError);
+
+	//mConnected = true;
+	//mNetworkLog->logMessage("connected");
+
+	//mTimeSinceLastUpdate = 0;
+
+	mUdpResolver = new udp::resolver(mIOService);
+	mUdpQuery = new udp::resolver::query(udp::v4(), mIpAddress, "8888");
 	
+    mUdpReceiverEndpoint = *(mUdpResolver->resolve(*mUdpQuery));
 
-	mSocketError = boost::asio::error::host_not_found;
-    mConnected = false;
+	mUdpSocket = new udp::socket(mIOService);
+	mUdpSocket->open(udp::v4());
 
-	while (mSocketError && endpoint_iterator != end)
-	{
-		mNetworkLog->logMessage("trying to connect to "+mIpAddress+":"+"8888");
-		mSocket->close();
-		mSocket->connect(*endpoint_iterator++, mSocketError);
-	}
-	if (mSocketError)
-		throw boost::system::system_error(mSocketError);
 
-	mConnected = true;
-	mNetworkLog->logMessage("connected");
-
-	mTimeSinceLastUpdate = 0;
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_sendPosition()
@@ -309,11 +319,17 @@ void NetworkSenderApp::_sendFloat(float _val)
 	char arr[4];
 	memcpy(arr, &_val, sizeof(_val));
 
-	int n = boost::asio::write(*mSocket
-							  ,boost::asio::buffer(arr, sizeof(_val))
-							  ,boost::asio::transfer_all()
-							  ,mSocketError);
-	//mConnected = (!mSocketError);
+	//int n = boost::asio::write(*mSocket
+	//						  ,boost::asio::buffer(arr, sizeof(_val))
+	//						  ,boost::asio::transfer_all()
+	//						  ,mSocketError);
+
+
+	mUdpSocket->send_to(boost::asio::buffer(arr, sizeof(_val))
+					   ,mUdpReceiverEndpoint
+					   ,0
+					   ,mSocketError);
+
 
 	if (mSocketError)
 	{

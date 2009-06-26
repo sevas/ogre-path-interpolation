@@ -8,8 +8,8 @@
 NetworkReceiverApp::NetworkReceiverApp(void)
 	:mAnimState2(NULL)
 	,mThread(0)
-	,mAcceptor(0)
-	,mSocket(0)
+	//,mAcceptor(0)
+	,mUdpSocket(0)
 {
 
 }
@@ -189,45 +189,57 @@ void NetworkReceiverApp::_startThread()
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::operator()()
 {
-	boost::asio::io_service io_service;
+	//boost::asio::io_service io_service;
 
-	mAcceptor = new tcp::acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
-	mRunning = true;
+	//mAcceptor = new tcp::acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
+	//mRunning = true;
 
+	//Timer timer;
+
+	//while (mRunning)
+	//{
+	//	mSocket = new tcp::socket(io_service);
+	//	mAcceptor->accept(*mSocket);
+
+
+	//	boost::system::error_code ignored_error;
+	//	mConnected = true;
+	//	timer.reset();
+	//	while (mConnected && mRunning)
+	//	{
+	//		//boost::array<char, 4> buf;
+	//		//boost::system::error_code ec;
+
+	//		//std::size_t n = mSocket->read_some(boost::asio::buffer(buf), ec);
+
+	//		//if (ec)
+	//		//{
+	//		//	mConnected = false;
+	//		//}
+	//		//else
+	//		//{
+	//		//	float x, y, z;
+	//		//	read_float(socket, ec, x);
+	//		//	read_float(socket, ec, y);
+	//		//	read_float(socket, ec, z);
+	//		//}
+	//		if (timer.getMillisecondsCPU() >= 10)
+	//		{
+	//			_readPosition();
+	//			timer.reset();
+	//		}
+	//	}
+	//	
+	//}
 	Timer timer;
+	mUdpSocket = new udp::socket(mIOService, udp::endpoint(udp::v4(), 8888));
 
-	while (mRunning)
+	while(mRunning)
 	{
-		mSocket = new tcp::socket(io_service);
-		mAcceptor->accept(*mSocket);
-
-
-		boost::system::error_code ignored_error;
-		mConnected = true;
-		timer.reset();
-		while (mConnected && mRunning)
+		if (timer.getMillisecondsCPU() >= 10)
 		{
-			//boost::array<char, 4> buf;
-			//boost::system::error_code ec;
-
-			//std::size_t n = mSocket->read_some(boost::asio::buffer(buf), ec);
-
-			//if (ec)
-			//{
-			//	mConnected = false;
-			//}
-			//else
-			//{
-			//	float x, y, z;
-			//	read_float(socket, ec, x);
-			//	read_float(socket, ec, y);
-			//	read_float(socket, ec, z);
-			//}
-			if (timer.getMillisecondsCPU() >= 10)
-			{
-				_readPosition();
-				timer.reset();
-			}
+			_readPosition();
+			timer.reset();
 		}
 		
 	}
@@ -237,9 +249,9 @@ void NetworkReceiverApp::_readPosition()
 {
 	boost::system::error_code ec;
 	Vector3 position;
-	_readFloat(*mSocket, ec, position.x);
-	_readFloat(*mSocket, ec, position.y);
-	_readFloat(*mSocket, ec, position.z);
+	_readFloat(*mUdpSocket, ec, position.x);
+	_readFloat(*mUdpSocket, ec, position.y);
+	_readFloat(*mUdpSocket, ec, position.z);
 
 	if (ec)
 		mConnected = false;
@@ -251,10 +263,11 @@ void NetworkReceiverApp::_readPosition()
 
 }
 //------------------------------------------------------------------------------
-void NetworkReceiverApp::_readFloat(tcp::socket&_socket, boost::system::error_code &_error, float &_val)
+void NetworkReceiverApp::_readFloat(udp::socket&_socket, boost::system::error_code &_error, float &_val)
 {
 	boost::array<char, 4> buf;
-	std::size_t n = _socket.read_some(boost::asio::buffer(buf), _error);
+	//std::size_t n = _socket.read_some(boost::asio::buffer(buf), _error);
+	mUdpSocket->receive_from(boost::asio::buffer(buf), mUdpRemotePoint, 0, _error);
 
 	memcpy(&_val, buf.c_array(), 4);
 }

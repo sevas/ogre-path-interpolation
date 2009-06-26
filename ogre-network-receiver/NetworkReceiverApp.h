@@ -13,7 +13,7 @@
 #include "ExampleApplication.h"
 
 using namespace Ogre;
-using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 
 
 
@@ -37,7 +37,7 @@ protected:
 
 	void _startThread();
 	void  _readPosition();
-	void  _readFloat(tcp::socket&,  boost::system::error_code&, float&);
+	void  _readFloat(udp::socket&,  boost::system::error_code&, float&);
 
 protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
@@ -46,7 +46,12 @@ protected:
 	boost::thread *mThread;
 	volatile bool mRunning, mConnected;
 
-	tcp::acceptor *mAcceptor;
-	tcp::socket *mSocket;
+	//tcp::acceptor *mAcceptor;
+	//tcp::socket *mSocket;
+
+	boost::asio::io_service mIOService;
+	udp::socket *mUdpSocket;
+	udp::endpoint mUdpRemotePoint;
+	boost::system::error_code mSocketError;
 	
 };

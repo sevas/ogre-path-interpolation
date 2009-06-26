@@ -12,7 +12,7 @@
 #include "ExampleApplication.h"
 
 using namespace Ogre;
-using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 
 
 class NetworkSenderApp: public ExampleApplication
@@ -42,10 +42,13 @@ protected:
 
 	std::string mIpAddress;
 	boost::asio::io_service mIOService;
-	tcp::resolver *mResolver;
+	/*tcp::resolver *mResolver;
 	tcp::resolver::query *mQuery;
-
-	tcp::socket *mSocket;
+	tcp::socket *mSocket;*/
+	udp::resolver *mUdpResolver;
+	udp::resolver::query *mUdpQuery;
+	udp::endpoint mUdpReceiverEndpoint;
+	udp::socket *mUdpSocket;
 
 	boost::system::error_code mSocketError;
 	bool mConnected;
