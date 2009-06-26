@@ -232,7 +232,9 @@ void NetworkReceiverApp::operator()()
 	//	
 	//}
 	Timer timer;
-	mUdpSocket = new udp::socket(mIOService, udp::endpoint(udp::v4(), 8888));
+
+	mUdpRemotePoint = udp::endpoint(udp::v4(), 8888);
+	mUdpSocket = new udp::socket(mIOService, mUdpRemotePoint);
 
 	while(mRunning)
 	{
