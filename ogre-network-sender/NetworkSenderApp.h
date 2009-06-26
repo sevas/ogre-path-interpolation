@@ -23,6 +23,7 @@ public:
 	virtual ~NetworkSenderApp(void);
 
 	bool frameStarted(const FrameEvent& evt);
+	bool frameEnded(const FrameEvent& evt);
 
 protected:
 	void createScene();
@@ -40,9 +41,15 @@ protected:
 	AnimationState *mAnimState, *mAnimState2;
 
 	std::string mIpAddress;
+	boost::asio::io_service mIOService;
+	tcp::resolver *mResolver;
+	tcp::resolver::query *mQuery;
+
 	tcp::socket *mSocket;
+
 	boost::system::error_code mSocketError;
 	bool mConnected;
 	Timer mTimer;
 	Real mTimeSinceLastUpdate;
+	Log *mNetworkLog;
 };

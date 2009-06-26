@@ -5,7 +5,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include <boost/thread/xtime.hpp>
+
+#include <boost/format.hpp>
 
 
 
@@ -14,12 +15,12 @@ NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	,mAnimState2(NULL)
 	,mSocket(0)
 	,mIpAddress(_ipAddress)
+	,mConnected(0)
 {
 }
 //------------------------------------------------------------------------------
 NetworkSenderApp::~NetworkSenderApp(void)
 {
-	mSocket->close();
 }
 //------------------------------------------------------------------------------
 bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
@@ -30,7 +31,11 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 	if (mAnimState2)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
 
-
+	return true;
+}
+//------------------------------------------------------------------------------
+bool NetworkSenderApp::frameEnded(const FrameEvent& evt)
+{
 	mTimeSinceLastUpdate += evt.timeSinceLastFrame;
 	_sendPosition();
 
@@ -245,36 +250,36 @@ void NetworkSenderApp::_createLight()
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_initNetwork()
 {
-	boost::asio::io_service io_service;
-	tcp::resolver resolver(io_service);
+	mNetworkLog = LogManager::getSingleton().createLog("network.log");
 
+	//boost::asio::io_service io_service;
+	mResolver = new tcp::resolver(mIOService);
 
-	tcp::resolver::query query(mIpAddress, "8888");
+ 
+	mQuery = new tcp::resolver::query(mIpAddress, "8888");
 
-	tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+	tcp::resolver::iterator endpoint_iterator = mResolver->resolve(*mQuery);
 	tcp::resolver::iterator end;
 
-	mSocket = new tcp::socket(io_service);
+	mSocket = new tcp::socket(mIOService);
 	
+
 	mSocketError = boost::asio::error::host_not_found;
     mConnected = false;
 
-	//while (!mConnected)
-	//{
-	mConnected = false;
 	while (mSocketError && endpoint_iterator != end)
 	{
+		mNetworkLog->logMessage("trying to connect to "+mIpAddress+":"+"8888");
 		mSocket->close();
 		mSocket->connect(*endpoint_iterator++, mSocketError);
-
 	}
 	if (mSocketError)
 		throw boost::system::system_error(mSocketError);
 
 	mConnected = true;
-	//}
+	mNetworkLog->logMessage("connected");
 
-	mTimer.reset();
+	mTimeSinceLastUpdate = 0;
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_sendPosition()
@@ -284,7 +289,11 @@ void NetworkSenderApp::_sendPosition()
 		
 		if (mTimeSinceLastUpdate > 1./60)
 		{
+			boost::format fmt("sending position (%.2f  %.2f  %.2f)");
 			Vector3 pos = mBallNode->getPosition();
+			fmt % pos.x % pos.y % pos.z;
+
+			mNetworkLog->logMessage(fmt.str());
 			_sendFloat(pos.x);
 			_sendFloat(pos.y);
 			_sendFloat(pos.z);
@@ -299,12 +308,18 @@ void NetworkSenderApp::_sendFloat(float _val)
 	char arr[4];
 	memcpy(arr, &_val, sizeof(_val));
 
-	int n = boost::asio::write((*mSocket)
-							  , boost::asio::buffer(arr, sizeof(_val))
-							  , boost::asio::transfer_all()
-							  , mSocketError);
-	mConnected = (n == 4);
-	
+	int n = boost::asio::write(*mSocket
+							  ,boost::asio::buffer(arr, sizeof(_val))
+							  ,boost::asio::transfer_all()
+							  ,mSocketError);
+	//mConnected = (!mSocketError);
+
+	if (mSocketError)
+	{
+		boost::format fmt("socket error : %d");
+		fmt % mSocketError;
+		mNetworkLog->logMessage(fmt.str());
+	}
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_sleep(int _ms)
