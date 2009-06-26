@@ -223,7 +223,7 @@ void NetworkReceiverApp::operator()()
 			//	read_float(socket, ec, y);
 			//	read_float(socket, ec, z);
 			//}
-			if (timer.getMillisecondsCPU() >= 25)
+			if (timer.getMillisecondsCPU() >= 10)
 			{
 				_readPosition();
 				timer.reset();
