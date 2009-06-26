@@ -19,7 +19,7 @@ class NetworkSenderApp: public ExampleApplication
 					  , public FrameListener
 {
 public:
-	NetworkSenderApp(void);
+	NetworkSenderApp(const char*);
 	virtual ~NetworkSenderApp(void);
 
 	bool frameStarted(const FrameEvent& evt);
@@ -39,6 +39,7 @@ protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
 	AnimationState *mAnimState, *mAnimState2;
 
+	std::string mIpAddress;
 	tcp::socket *mSocket;
 	boost::system::error_code mSocketError;
 	bool mConnected;

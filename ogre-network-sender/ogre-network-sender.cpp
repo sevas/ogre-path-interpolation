@@ -16,7 +16,7 @@ extern "C" {
 	INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 	{
 		// Create application object
-		NetworkSenderApp app;
+		NetworkSenderApp app(strCmdLine);
 
 		try {
 			app.go();
