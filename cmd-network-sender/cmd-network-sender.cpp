@@ -52,6 +52,9 @@ int main(int argc, char* argv[])
 
 		std::cout << "connected" << std::endl;
 		int i=0; float f = 0.0f;
+
+		int pos;
+
 		char c = 'a';
 		std::stringstream s;
 
@@ -59,12 +62,14 @@ int main(int argc, char* argv[])
 
 		for (;;)
 		{        
-			f = rand() % 100;
 			write_float(socket, error, f);
-			f = rand() % 100;
 			write_float(socket, error, f);
-			f = rand() % 100;
 			write_float(socket, error, f);
+
+			f+=1.0;
+			if(f>300)
+				f=0.0;
+			
 
 
 			if (error == boost::asio::error::eof)
@@ -72,7 +77,7 @@ int main(int argc, char* argv[])
 			else if (error)
 				throw boost::system::system_error(error); // Some other error.
 
-			Sleep(1000);
+			Sleep(33);
 
 			//    std::cout.write(buf.data(), len);
 		}

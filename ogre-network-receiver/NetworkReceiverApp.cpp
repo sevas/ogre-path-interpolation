@@ -235,8 +235,8 @@ void NetworkReceiverApp::_readPosition()
 	_readFloat(*mSocket, ec, position.y);
 	_readFloat(*mSocket, ec, position.z);
 
-	//if (ec)
-	//	mConnected = false;
+	if (ec)
+		mConnected = false;
 
 	if (position.distance(Vector3::ZERO) < 500)
 		mBallNode->setPosition(position);
