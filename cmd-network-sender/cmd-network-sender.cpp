@@ -67,18 +67,24 @@ int main(int argc, char* argv[])
 			write_float(socket, error, f);
 			write_float(socket, error, 0);
 
-			f+=.5;
+            if (error == boost::asio::error::eof)
+                break; // Connection closed cleanly by peer.
+            else if (error)
+                throw boost::system::system_error(error); // Some other error.
+
+            Sleep(15);
+
+
+			f+=1.0;
 			if(f>200)
+            {
 				f=0.0;
+                Sleep(5000);
+            }
 			
 
 
-			if (error == boost::asio::error::eof)
-				break; // Connection closed cleanly by peer.
-			else if (error)
-				throw boost::system::system_error(error); // Some other error.
-
-			Sleep(33);
+			
 
 			//    std::cout.write(buf.data(), len);
 		}
