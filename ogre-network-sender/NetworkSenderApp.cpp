@@ -287,13 +287,14 @@ void NetworkSenderApp::_sendPosition()
 	if(mConnected)
 	{
 		
-		if (mTimeSinceLastUpdate > 1./60)
+		if (mTimeSinceLastUpdate > 1./30)
 		{
-			boost::format fmt("sending position (%.2f  %.2f  %.2f)");
+			/*boost::format fmt("sending position (%.2f  %.2f  %.2f)");
 			Vector3 pos = mBallNode->getPosition();
 			fmt % pos.x % pos.y % pos.z;
 
-			mNetworkLog->logMessage(fmt.str());
+			mNetworkLog->logMessage(fmt.str());*/
+			Vector3 pos = mBallNode->getPosition();
 			_sendFloat(pos.x);
 			_sendFloat(pos.y);
 			_sendFloat(pos.z);
