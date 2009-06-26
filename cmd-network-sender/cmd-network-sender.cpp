@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #include <iostream>
+#include <string>
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -24,15 +25,15 @@ void write_float(tcp::socket &_socket, boost::system::error_code& _error, float 
 	boost::asio::write(_socket, boost::asio::buffer(arr, sizeof(_val)), boost::asio::transfer_all(),  _error);
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	try
 	{
 		boost::asio::io_service io_service;
 		tcp::resolver resolver(io_service);
 
-
-		tcp::resolver::query query("127.0.0.1", "8888");
+		std::string ip(argv[1]);
+		tcp::resolver::query query(ip, "8888");
 
 		tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 		tcp::resolver::iterator end;
