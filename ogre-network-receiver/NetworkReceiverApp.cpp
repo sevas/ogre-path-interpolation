@@ -193,6 +193,9 @@ void NetworkReceiverApp::operator()()
 
 	mAcceptor = new tcp::acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
 	mRunning = true;
+
+	Timer timer;
+
 	while (mRunning)
 	{
 		mSocket = new tcp::socket(io_service);
@@ -201,7 +204,7 @@ void NetworkReceiverApp::operator()()
 
 		boost::system::error_code ignored_error;
 		mConnected = true;
-		
+		timer.reset();
 		while (mConnected && mRunning)
 		{
 			//boost::array<char, 4> buf;
@@ -220,8 +223,11 @@ void NetworkReceiverApp::operator()()
 			//	read_float(socket, ec, y);
 			//	read_float(socket, ec, z);
 			//}
-
-			_readPosition();
+			if (timer.getMillisecondsCPU() >= 25)
+			{
+				_readPosition();
+				timer.reset();
+			}
 		}
 		
 	}

@@ -48,4 +48,5 @@ protected:
 
 	tcp::acceptor *mAcceptor;
 	tcp::socket *mSocket;
+	
 };
