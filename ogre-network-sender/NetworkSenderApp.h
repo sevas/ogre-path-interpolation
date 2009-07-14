@@ -55,4 +55,6 @@ protected:
 	Timer mTimer;
 	Real mTimeSinceLastUpdate;
 	Log *mNetworkLog;
+
+	int mRate;
 };
