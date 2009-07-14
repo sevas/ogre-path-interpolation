@@ -42,9 +42,7 @@ protected:
 
 	std::string mIpAddress;
 	boost::asio::io_service mIOService;
-	/*tcp::resolver *mResolver;
-	tcp::resolver::query *mQuery;
-	tcp::socket *mSocket;*/
+
 	udp::resolver *mUdpResolver;
 	udp::resolver::query *mUdpQuery;
 	udp::endpoint mUdpReceiverEndpoint;
