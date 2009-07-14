@@ -189,48 +189,7 @@ void NetworkReceiverApp::_startThread()
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::operator()()
 {
-	//boost::asio::io_service io_service;
 
-	//mAcceptor = new tcp::acceptor(io_service, tcp::endpoint(tcp::v4(), 8888));
-	//mRunning = true;
-
-	//Timer timer;
-
-	//while (mRunning)
-	//{
-	//	mSocket = new tcp::socket(io_service);
-	//	mAcceptor->accept(*mSocket);
-
-
-	//	boost::system::error_code ignored_error;
-	//	mConnected = true;
-	//	timer.reset();
-	//	while (mConnected && mRunning)
-	//	{
-	//		//boost::array<char, 4> buf;
-	//		//boost::system::error_code ec;
-
-	//		//std::size_t n = mSocket->read_some(boost::asio::buffer(buf), ec);
-
-	//		//if (ec)
-	//		//{
-	//		//	mConnected = false;
-	//		//}
-	//		//else
-	//		//{
-	//		//	float x, y, z;
-	//		//	read_float(socket, ec, x);
-	//		//	read_float(socket, ec, y);
-	//		//	read_float(socket, ec, z);
-	//		//}
-	//		if (timer.getMillisecondsCPU() >= 10)
-	//		{
-	//			_readPosition();
-	//			timer.reset();
-	//		}
-	//	}
-	//	
-	//}
 	Timer timer;
 	mRunning = true;
 	mUdpRemotePoint = udp::endpoint(udp::v4(), 8888);
@@ -268,7 +227,6 @@ void NetworkReceiverApp::_readPosition()
 void NetworkReceiverApp::_readFloat(udp::socket&_socket, boost::system::error_code &_error, float &_val)
 {
 	boost::array<char, 4> buf;
-	//std::size_t n = _socket.read_some(boost::asio::buffer(buf), _error);
 	mUdpSocket->receive_from(boost::asio::buffer(buf), mUdpRemotePoint, 0, _error);
 
 	memcpy(&_val, buf.c_array(), 4);

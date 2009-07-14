@@ -46,9 +46,6 @@ protected:
 	boost::thread *mThread;
 	volatile bool mRunning, mConnected;
 
-	//tcp::acceptor *mAcceptor;
-	//tcp::socket *mSocket;
-
 	boost::asio::io_service mIOService;
 	udp::socket *mUdpSocket;
 	udp::endpoint mUdpRemotePoint;
