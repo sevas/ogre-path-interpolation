@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
             else if (error)
                 throw boost::system::system_error(error); // Some other error.
 
-            Sleep(15);
+            Sleep(33);
 
 
 			f+=1.0;

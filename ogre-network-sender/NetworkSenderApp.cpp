@@ -15,8 +15,7 @@ NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	,mAnimState2(NULL)
 	,mUdpSocket(0)
 	,mIpAddress(_ipAddress)
-	,mConnected(0)
-	,mRate(60)
+	,mConnected(1)
 {
 }
 //------------------------------------------------------------------------------
@@ -170,7 +169,8 @@ void NetworkSenderApp::_createAxes(int _nUnits)
 
 	mGridNode->scale(scale, scale, scale);
 
-}//------------------------------------------------------------------------------
+}
+//------------------------------------------------------------------------------
 void NetworkSenderApp::_createGrid(int _nUnits)
 {
 	float step = 0.1;
@@ -251,36 +251,8 @@ void NetworkSenderApp::_createLight()
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_initNetwork()
 {
-	//mNetworkLog = LogManager::getSingleton().createLog("network.log");
+	mNetworkLog = LogManager::getSingleton().createLog("network.log");
 
-
-	//mResolver = new tcp::resolver(mIOService);
-
- //
-	//mQuery = new tcp::resolver::query(mIpAddress, "8888");
-
-	//tcp::resolver::iterator endpoint_iterator = mResolver->resolve(*mQuery);
-	//tcp::resolver::iterator end;
-
-	//mSocket = new tcp::socket(mIOService);
-	//
-
-	//mSocketError = boost::asio::error::host_not_found;
- //   mConnected = false;
-
-	//while (mSocketError && endpoint_iterator != end)
-	//{
-	//	mNetworkLog->logMessage("trying to connect to "+mIpAddress+":"+"8888");
-	//	mSocket->close();
-	//	mSocket->connect(*endpoint_iterator++, mSocketError);
-	//}
-	//if (mSocketError)
-	//	throw boost::system::system_error(mSocketError);
-
-	//mConnected = true;
-	//mNetworkLog->logMessage("connected");
-
-	//mTimeSinceLastUpdate = 0;
 
 	mUdpResolver = new udp::resolver(mIOService);
 	mUdpQuery = new udp::resolver::query(udp::v4(), mIpAddress, "8888");
@@ -290,8 +262,8 @@ void NetworkSenderApp::_initNetwork()
 	mUdpSocket = new udp::socket(mIOService);
 	mUdpSocket->open(udp::v4());
 
-	mConnected = true;
-	mTimeSinceLastUpdate = 0;
+    mConnected = true;
+
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_sendPosition()
@@ -301,12 +273,12 @@ void NetworkSenderApp::_sendPosition()
 		
 		if (mTimeSinceLastUpdate > 1./60)
 		{
-			/*boost::format fmt("sending position (%.2f  %.2f  %.2f)");
-			Vector3  pos = mBallNode->getPosition();
-			fmt % pos.x % pos.y % pos.z;
+            Vector3 pos = mBallNode->getPosition();
 
-			mNetworkLog->logMessage(fmt.str());*/
-			Vector3 pos = mBallNode->getPosition();
+			boost::format fmt("sending position (%.2f  %.2f  %.2f)");
+			fmt % pos.x % pos.y % pos.z;
+			mNetworkLog->logMessage(fmt.str());
+
 			_sendFloat(pos.x);
 			_sendFloat(pos.y);
 			_sendFloat(pos.z);
