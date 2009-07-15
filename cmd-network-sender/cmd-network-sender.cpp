@@ -14,15 +14,21 @@
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 
-using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 
-void write_float(tcp::socket &_socket, boost::system::error_code& _error, float _val)
+void write_float(udp::socket &_udpSocket, udp::endpoint &_udpReceiverPoint
+				 , boost::system::error_code& _error, float _val)
 {
 	char arr[4];
 	memcpy(arr, &_val, sizeof(_val));
 
 	std::cout << "sending FLOAT " << _val << std::endl;
-	boost::asio::write(_socket, boost::asio::buffer(arr, sizeof(_val)), boost::asio::transfer_all(),  _error);
+	//boost::asio::write(_socket, boost::asio::buffer(arr, sizeof(_val)), boost::asio::transfer_all(),  _error);
+
+	_udpSocket.send_to(boost::asio::buffer(arr, sizeof(_val))
+				     , _udpReceiverPoint
+					 , 0
+					 , _error);
 }
 
 int main(int argc, char* argv[])
@@ -32,24 +38,20 @@ int main(int argc, char* argv[])
 	try
 	{
 		boost::asio::io_service io_service;
-		tcp::resolver resolver(io_service);
+		udp::resolver resolver(io_service);
 
 		std::string ip(argv[1]);
-		tcp::resolver::query query(ip, "8888");
+		udp::resolver::query query(udp::v4(), ip, "8888");
 
-		tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-		tcp::resolver::iterator end;
+		//udp::resolver::iterator iterator = resolver.resolve(query);
 
-		tcp::socket socket(io_service);
+		udp::endpoint receiverEndpoint = *resolver.resolve(query);
+		
+		udp::socket udpSocket(io_service);
+		udpSocket.open(udp::v4());
+
 		boost::system::error_code error = boost::asio::error::host_not_found;
-		while (error && endpoint_iterator != end)
-		{
-			std::cout << "trying to connect " << std::endl;
-			socket.close();
-			socket.connect(*endpoint_iterator++, error);
-		}
-		if (error)
-			throw boost::system::system_error(error);
+		
 
 		std::cout << "connected" << std::endl;
 		int i=0; float f = 0.0f;
@@ -63,16 +65,16 @@ int main(int argc, char* argv[])
 
 		for (;;)
 		{        
-			write_float(socket, error, f);
-			write_float(socket, error, f);
-			write_float(socket, error, 0);
+			write_float(udpSocket, receiverEndpoint, error, f);
+			write_float(udpSocket, receiverEndpoint, error, f);
+			write_float(udpSocket, receiverEndpoint, error, 0);
 
             if (error == boost::asio::error::eof)
                 break; // Connection closed cleanly by peer.
             else if (error)
                 throw boost::system::system_error(error); // Some other error.
 
-            Sleep(33);
+            Sleep(15);
 
 
 			f+=1.0;
