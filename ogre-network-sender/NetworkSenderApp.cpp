@@ -16,6 +16,9 @@ NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	,mUdpSocket(0)
 	,mIpAddress(_ipAddress)
 	,mConnected(1)
+	,mTimeSinceLastUpdate(0)
+	,mCurrentSpeed(Vector3::ZERO)
+	,mIsMoving(false)
 {
 }
 //------------------------------------------------------------------------------
@@ -31,13 +34,33 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 	if (mAnimState2)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
 
+
+    mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+    _sendPosition();
+
 	return true;
 }
 //------------------------------------------------------------------------------
-bool NetworkSenderApp::frameEnded(const FrameEvent& evt)
+bool NetworkSenderApp::frameEnded_(const FrameEvent& evt)
 {
-	mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-	_sendPosition();
+    //if(mLastBallPosition == mBallNode->getPosition())
+    //{
+    //    if(mIsMoving)
+    //    {
+    //        mIsMoving = false;
+    //        mCurrentSpeed = Vector3::ZERO;
+    //    }
+    //}
+    //else
+    //{
+    //    if(!mIsMoving)
+    //    {
+    //        
+    //    }
+    //}
+
+	//mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+	//_sendPosition();
 
 	return true;
 }
@@ -139,6 +162,9 @@ void NetworkSenderApp::createScene()
 	mAnimState->setEnabled(1);
 
 	_initNetwork();
+
+	// start of track
+	mLastBallPosition = Vector3(0, 0, 0);
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_createAxes(int _nUnits)
@@ -271,8 +297,7 @@ void NetworkSenderApp::_initNetwork()
 void NetworkSenderApp::_sendPosition()
 {
 	if(mConnected)
-	{
-		
+	{		
 		if (mTimeSinceLastUpdate > 1./60)
 		{
             Vector3 pos = mBallNode->getPosition();

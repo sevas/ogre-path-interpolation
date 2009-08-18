@@ -23,7 +23,7 @@ public:
 	virtual ~NetworkSenderApp(void);
 
 	bool frameStarted(const FrameEvent& evt);
-	bool frameEnded(const FrameEvent& evt);
+	bool frameEnded_(const FrameEvent& evt);
 
 protected:
 	void createScene();
@@ -39,6 +39,9 @@ protected:
 protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
 	AnimationState *mAnimState, *mAnimState2;
+
+	Vector3 mLastBallPosition, mCurrentSpeed;
+	bool mIsMoving;
 
 	std::string mIpAddress;
 	boost::asio::io_service mIOService;

@@ -56,7 +56,6 @@ void NetworkReceiverApp::createScene()
 	mBallNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Ball Node");
 	Entity *ent = mSceneMgr->createEntity("my ball", "sphere.mesh");
 	ent->setMaterialName("Objects/Ball");
-//	ent->setNormaliseNormals(true);
 
 	ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
 
