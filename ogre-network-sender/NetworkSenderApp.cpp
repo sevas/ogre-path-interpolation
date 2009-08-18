@@ -57,10 +57,12 @@ void NetworkSenderApp::createScene()
 
 	mRoot->addFrameListener(this); 
 
+	mSceneMgr->setNormaliseNormalsOnScale(true);
+
 	_createAxes(5);
 	_createGrid(5);
 
-	mCamera->setPosition(Vector3(100, 100, 100));
+		mCamera->setPosition(Vector3(100, 100, 100));
 	mCamera->lookAt(Vector3::ZERO);
 
 	_createLight();
@@ -69,7 +71,7 @@ void NetworkSenderApp::createScene()
 	mBallNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Ball Node");
 	Entity *ent = mSceneMgr->createEntity("my ball", "sphere.mesh");
 	ent->setMaterialName("Objects/Ball");
-	ent->setNormaliseNormals(true);
+//	ent->setNormaliseNormals(true);
 
 	ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
 

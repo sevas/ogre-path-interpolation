@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <Ogre.h>
+#include <OgreSimpleSpline.h>
 #include <OIS/OIS.h>
 
 #include <boost/thread.hpp>
@@ -51,4 +52,5 @@ protected:
 	udp::endpoint mUdpRemotePoint;
 	boost::system::error_code mSocketError;
 	
+	Ogre::SimpleSpline mSpline;
 };

@@ -8,9 +8,9 @@
 NetworkReceiverApp::NetworkReceiverApp(void)
 	:mAnimState2(NULL)
 	,mThread(0)
-	//,mAcceptor(0)
 	,mUdpSocket(0)
 {
+	
 
 }
 //------------------------------------------------------------------------------
@@ -42,6 +42,8 @@ void NetworkReceiverApp::createScene()
 
 	mRoot->addFrameListener(this);
 
+	mSceneMgr->setNormaliseNormalsOnScale(true);
+
 	_createAxes(5);
 	_createGrid(5);
 
@@ -54,7 +56,7 @@ void NetworkReceiverApp::createScene()
 	mBallNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Ball Node");
 	Entity *ent = mSceneMgr->createEntity("my ball", "sphere.mesh");
 	ent->setMaterialName("Objects/Ball");
-	ent->setNormaliseNormals(true);
+//	ent->setNormaliseNormals(true);
 
 	ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
 
@@ -154,11 +156,7 @@ void NetworkReceiverApp::_createLight()
 	light->setPosition(Vector3(0, 100, 0));
 	light->setSpecularColour(ColourValue::White);
 	light->setDiffuseColour(ColourValue::White);
-	/*light->setAttenuation(300
-	, light->getAttenuationConstant() 
-	, light->getAttenuationLinear() 
-	, light->getAttenuationQuadric());
-	*/
+
 
 	mLightNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("light node");
 	mLightNode->attachObject(light);

@@ -9,6 +9,8 @@
 #include <iostream>
 #include <string>
 
+#include <cmath>
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
@@ -34,7 +36,6 @@ void write_float(udp::socket &_udpSocket, udp::endpoint &_udpReceiverPoint
 int main(int argc, char* argv[])
 {
     srand(time(NULL));
-	srand(time(NULL));
 	try
 	{
 		boost::asio::io_service io_service;
@@ -65,8 +66,8 @@ int main(int argc, char* argv[])
 
 		for (;;)
 		{        
-			write_float(udpSocket, receiverEndpoint, error, f);
-			write_float(udpSocket, receiverEndpoint, error, f);
+			write_float(udpSocket, receiverEndpoint, error, 50*cos(f));
+			write_float(udpSocket, receiverEndpoint, error, 50*sin(f));
 			write_float(udpSocket, receiverEndpoint, error, 0);
 
             if (error == boost::asio::error::eof)
@@ -74,14 +75,17 @@ int main(int argc, char* argv[])
             else if (error)
                 throw boost::system::system_error(error); // Some other error.
 
-            Sleep(15);
+			int speed = 4;
+			int time_split = 33;
+
+            Sleep(time_split);
 
 
-			f+=1.0;
-			if(f>200)
+			f+= (1.0/(speed*time_split)) * (2*3.1416) ;
+			if(f>2*3.1416)
             {
 				f=0.0;
-                Sleep(5000);
+                //Sleep(5000);
             }
 			
 
