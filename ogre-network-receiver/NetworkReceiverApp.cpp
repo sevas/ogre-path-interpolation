@@ -10,8 +10,7 @@ NetworkReceiverApp::NetworkReceiverApp(void)
 	,mThread(0)
 	,mUdpSocket(0)
 {
-	
-
+    mTitle = "Receiver";
 }
 //------------------------------------------------------------------------------
 NetworkReceiverApp::~NetworkReceiverApp(void)
@@ -213,8 +212,6 @@ void NetworkReceiverApp::_readPosition()
 	Vector3 position, speed;
     
     _readPdu(position, speed, ec);
-
-
 
     //boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
     //fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;

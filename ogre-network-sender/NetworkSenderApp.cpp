@@ -27,6 +27,7 @@ NetworkSenderApp::NetworkSenderApp()
     ,mHasMoved(false)
     ,mSamplingInterval(1.0)
 {
+    mTitle = "Sender";
 }
 //------------------------------------------------------------------------------
 NetworkSenderApp::~NetworkSenderApp(void)
