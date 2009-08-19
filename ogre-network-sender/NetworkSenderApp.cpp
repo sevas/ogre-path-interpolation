@@ -64,8 +64,7 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
     {
         mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
         mLastBallPosition = currentPos;
-        //mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-        //
+        
         if (mTimeSinceLastUpdate > mSamplingInterval)
         {
             _sendPosition();
@@ -142,7 +141,7 @@ void NetworkSenderApp::createScene()
 
 
 	float w = ent->getBoundingBox().getSize().x;
-	float ws = 50.0 / w;
+	float ws = 10.0 / w;
 	
 	mBallNode->attachObject(ent);
 	mBallNode->setScale(ws, ws, ws);
@@ -346,9 +345,9 @@ void NetworkSenderApp::_sendPosition()
         Vector3 pos = mBallNode->getPosition();
         Vector3 speed = mCurrentSpeed;
 
-		boost::format fmt("[new pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
-		fmt % pos.x % pos.y % pos.z % speed.x % speed.y % speed.z;
-		mNetworkLog->logMessage(fmt.str());
+		//boost::format fmt("[new pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
+		//fmt % pos.x % pos.y % pos.z % speed.x % speed.y % speed.z;
+		//mNetworkLog->logMessage(fmt.str());
 
         _sendPdu(pos, speed);
 	}

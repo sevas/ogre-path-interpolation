@@ -65,7 +65,7 @@ void NetworkReceiverApp::createScene()
 
 
 	float w = ent->getBoundingBox().getSize().x;
-	float ws = 50.0 / w;
+	float ws = 10.0 / w;
 	
 	mBallNode->attachObject(ent);
 	mBallNode->setScale(ws, ws, ws);
