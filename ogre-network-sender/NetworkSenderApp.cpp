@@ -197,6 +197,7 @@ void NetworkSenderApp::createScene()
 	mAnimState = mSceneMgr->createAnimationState("bouncing ball");
 	mAnimState->setEnabled(1);
 
+    _readConfigurationFromFile();
 	_initNetwork();
 
 	// start of track
