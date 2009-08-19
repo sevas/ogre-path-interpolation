@@ -9,6 +9,11 @@
 #include <boost/format.hpp>
 
 
+Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
+{
+    return (_p - _q) / _dt;
+}
+
 
 NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	:mAnimState(NULL)
@@ -19,6 +24,7 @@ NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	,mTimeSinceLastUpdate(0)
 	,mCurrentSpeed(Vector3::ZERO)
 	,mIsMoving(false)
+    ,mHasMoved(false)
 {
 }
 //------------------------------------------------------------------------------
@@ -35,11 +41,36 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
 
 
-    mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-    _sendPosition();
+   
+
+    Vector3 currentPos = mBallNode->getPosition();
+
+    if (! mIsMoving)
+    {
+        if(currentPos != mLastBallPosition)
+        {
+            mHasMoved = true;
+            mIsMoving = true;
+            mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+            mLastBallPosition = currentPos;
+        }
+    }
+    else
+    {
+        mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+        mLastBallPosition = currentPos;
+        mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+        if (mTimeSinceLastUpdate > 1./10)
+            _sendPosition();
+         
+    }
+    
+
+    
 
 	return true;
 }
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 bool NetworkSenderApp::frameEnded_(const FrameEvent& evt)
 {
@@ -298,21 +329,37 @@ void NetworkSenderApp::_sendPosition()
 {
 	if(mConnected)
 	{		
-		if (mTimeSinceLastUpdate > 1./60)
-		{
-            Vector3 pos = mBallNode->getPosition();
+        Vector3 pos = mBallNode->getPosition();
+        Vector3 speed = mCurrentSpeed;
 
-			boost::format fmt("sending position (%.2f  %.2f  %.2f)");
-			fmt % pos.x % pos.y % pos.z;
-			mNetworkLog->logMessage(fmt.str());
+		boost::format fmt("[new pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
+		fmt % pos.x % pos.y % pos.z % speed.x % speed.y % speed.z;
+		mNetworkLog->logMessage(fmt.str());
 
-			_sendFloat(pos.x);
-			_sendFloat(pos.y);
-			_sendFloat(pos.z);
+        _sendPdu(pos, speed);
 
-			mTimeSinceLastUpdate = 0;
-		}
+		mTimeSinceLastUpdate = 0;
 	}
+}
+//------------------------------------------------------------------------------
+void NetworkSenderApp::_sendPdu(const Vector3 &_pos, const Vector3 &_speed)
+{
+    char arr[6*sizeof(Real)];
+    
+    memcpy(arr,   _pos.ptr(),   3*sizeof(Real));
+    memcpy(arr+3, _speed.ptr(), 3*sizeof(Real));
+    
+    mUdpSocket->send_to(boost::asio::buffer(arr, 6*sizeof(Real))
+                        ,mUdpReceiverEndpoint
+                        ,0
+                        ,mSocketError);
+
+    if (mSocketError)
+    {
+        boost::format fmt("socket error : %d");
+        fmt % mSocketError;
+        mNetworkLog->logMessage(fmt.str());
+    }
 }
 //------------------------------------------------------------------------------
 void NetworkSenderApp::_sendFloat(float _val)

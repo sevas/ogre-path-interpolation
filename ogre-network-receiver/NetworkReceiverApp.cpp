@@ -206,19 +206,32 @@ void NetworkReceiverApp::operator()()
 void NetworkReceiverApp::_readPosition()
 {
 	boost::system::error_code ec;
-	Vector3 position;
-	_readFloat(*mUdpSocket, ec, position.x);
-	_readFloat(*mUdpSocket, ec, position.y);
-	_readFloat(*mUdpSocket, ec, position.z);
+	Vector3 position, speed;
+	//_readFloat(*mUdpSocket, ec, position.x);
+	//_readFloat(*mUdpSocket, ec, position.y);
+	//_readFloat(*mUdpSocket, ec, position.z);
+    
+    _readPdu(position, speed, ec);
 
 	if (ec)
 		mConnected = false;
 
-	if (position.distance(Vector3::ZERO) < 500)
-		mBallNode->setPosition(position);
-	else
-		mBallNode->setPosition(Vector3(0, 100, 0));
+    else
+    {
+	    if (position.distance(Vector3::ZERO) < 500)
+		    mBallNode->setPosition(position);
+	    else
+		    mBallNode->setPosition(Vector3(0, 100, 0));
+    }
+}
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::_readPdu(Vector3& _oPos, Vector3& _oSpeed, boost::system::error_code &_error)
+{
+    boost::array<char, 6*sizeof(Real)> buf;
+    mUdpSocket->receive_from(boost::asio::buffer(buf), mUdpRemotePoint, 0, _error);
 
+    memcpy(_oPos.ptr(),     buf.c_array(), 3*sizeof(Real));
+    memcpy(_oSpeed.ptr(),   buf.c_array()+3, 3*sizeof(Real));
 }
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_readFloat(udp::socket&_socket, boost::system::error_code &_error, float &_val)

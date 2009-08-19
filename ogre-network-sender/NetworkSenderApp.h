@@ -34,6 +34,7 @@ protected:
 	void _initNetwork();
 	void _sendPosition();
 	void _sendFloat(float);
+    void _sendPdu(const Vector3&, const Vector3&);
 	void _sleep(int);
 
 protected:
@@ -41,7 +42,7 @@ protected:
 	AnimationState *mAnimState, *mAnimState2;
 
 	Vector3 mLastBallPosition, mCurrentSpeed;
-	bool mIsMoving;
+	bool mIsMoving, mHasMoved;
 
 	std::string mIpAddress;
 	boost::asio::io_service mIOService;

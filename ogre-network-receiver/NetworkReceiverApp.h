@@ -38,6 +38,7 @@ protected:
 
 	void _startThread();
 	void  _readPosition();
+    void  _readPdu(Vector3&, Vector3&,  boost::system::error_code&);
 	void  _readFloat(udp::socket&,  boost::system::error_code&, float&);
 
 protected:
