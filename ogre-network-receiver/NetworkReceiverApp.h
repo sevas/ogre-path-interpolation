@@ -53,5 +53,5 @@ protected:
 	udp::endpoint mUdpRemotePoint;
 	boost::system::error_code mSocketError;
 	
-	Ogre::SimpleSpline mSpline;
+    Ogre::Log *mNetworkLog;
 };

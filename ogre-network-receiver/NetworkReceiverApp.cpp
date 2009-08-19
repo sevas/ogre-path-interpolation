@@ -192,13 +192,17 @@ void NetworkReceiverApp::operator()()
 	mUdpRemotePoint = udp::endpoint(udp::v4(), 8888);
 	mUdpSocket = new udp::socket(mIOService, mUdpRemotePoint);
 
+	mNetworkLog = LogManager::getSingleton().createLog("network_receiver.log");
+
+
 	while(mRunning)
 	{
-		if (timer.getMillisecondsCPU() >= 10)
-		{
-			_readPosition();
-			timer.reset();
-		}
+		//if (timer.getMillisecondsCPU() >= 10)
+		//{
+		//	_readPosition();
+		//	timer.reset();
+		//}
+        _readPosition();
 		
 	}
 }
@@ -207,21 +211,25 @@ void NetworkReceiverApp::_readPosition()
 {
 	boost::system::error_code ec;
 	Vector3 position, speed;
-	//_readFloat(*mUdpSocket, ec, position.x);
-	//_readFloat(*mUdpSocket, ec, position.y);
-	//_readFloat(*mUdpSocket, ec, position.z);
     
     _readPdu(position, speed, ec);
+
+
+
+    boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
+    fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;
+    mNetworkLog->logMessage(fmt.str());
 
 	if (ec)
 		mConnected = false;
 
     else
     {
-	    if (position.distance(Vector3::ZERO) < 500)
+	 /*   if (position.distance(Vector3::ZERO) < 500)
 		    mBallNode->setPosition(position);
 	    else
-		    mBallNode->setPosition(Vector3(0, 100, 0));
+		    mBallNode->setPosition(Vector3(0, 100, 0));*/
+        mBallNode->setPosition(position);
     }
 }
 //------------------------------------------------------------------------------
@@ -231,7 +239,7 @@ void NetworkReceiverApp::_readPdu(Vector3& _oPos, Vector3& _oSpeed, boost::syste
     mUdpSocket->receive_from(boost::asio::buffer(buf), mUdpRemotePoint, 0, _error);
 
     memcpy(_oPos.ptr(),     buf.c_array(), 3*sizeof(Real));
-    memcpy(_oSpeed.ptr(),   buf.c_array()+3, 3*sizeof(Real));
+    memcpy(_oSpeed.ptr(),   buf.c_array()+(3*sizeof(Real)), 3*sizeof(Real));
 }
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_readFloat(udp::socket&_socket, boost::system::error_code &_error, float &_val)
