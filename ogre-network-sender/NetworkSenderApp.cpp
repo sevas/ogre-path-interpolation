@@ -21,6 +21,7 @@ NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
 	,mUdpSocket(0)
 	,mIpAddress(_ipAddress)
 	,mConnected(1)
+    ,mTimeSinceLastUpdate(0)
 	,mTimeSinceLastUpdate(0)
 	,mCurrentSpeed(Vector3::ZERO)
 	,mIsMoving(false)
@@ -41,6 +42,8 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
 
 
+    mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+    _sendPosition();
    
 
     Vector3 currentPos = mBallNode->getPosition();
