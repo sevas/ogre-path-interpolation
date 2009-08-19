@@ -15,16 +15,17 @@ Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
 }
 
 
-NetworkSenderApp::NetworkSenderApp(const char *_ipAddress)
+NetworkSenderApp::NetworkSenderApp()
 	:mAnimState(NULL)
 	,mAnimState2(NULL)
 	,mUdpSocket(0)
-	,mIpAddress(_ipAddress)
+	,mIpAddress("")
 	,mConnected(1)
     ,mTimeSinceLastUpdate(0)
 	,mCurrentSpeed(Vector3::ZERO)
 	,mIsMoving(false)
     ,mHasMoved(false)
+    ,mSamplingInterval(1.0)
 {
 }
 //------------------------------------------------------------------------------
@@ -64,20 +65,15 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
         mLastBallPosition = currentPos;
         //mTimeSinceLastUpdate += evt.timeSinceLastFrame;
         //
-        if (mTimeSinceLastUpdate > 1)
+        if (mTimeSinceLastUpdate > mSamplingInterval)
         {
             _sendPosition();
             mTimeSinceLastUpdate = 0;
         }
          
     }
-    
-
-    
-
-	return true;
+   	return true;
 }
-//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 bool NetworkSenderApp::frameEnded_(const FrameEvent& evt)
 {
@@ -105,13 +101,15 @@ bool NetworkSenderApp::frameEnded_(const FrameEvent& evt)
 //------------------------------------------------------------------------------
 void NetworkSenderApp::createScene()
 {
-	const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-	if (!caps->hasCapability(RSC_VERTEX_PROGRAM) || !(caps->hasCapability(RSC_FRAGMENT_PROGRAM)))
-	{
-		OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Your card does not support vertex and fragment programs, so cannot "
-			"run this demo. Sorry!", 
-			"createScene");
-	}
+
+
+	//const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+	//if (!caps->hasCapability(RSC_VERTEX_PROGRAM) || !(caps->hasCapability(RSC_FRAGMENT_PROGRAM)))
+	//{
+	//	OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Your card does not support vertex and fragment programs, so cannot "
+	//		"run this demo. Sorry!", 
+	//		"createScene");
+	//}
 
 	Viewport *vp = mWindow->getViewport(0);
 	vp->setBackgroundColour(ColourValue(0.7, 0.7, 0.7));
@@ -132,13 +130,13 @@ void NetworkSenderApp::createScene()
 	mBallNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Ball Node");
 	Entity *ent = mSceneMgr->createEntity("my ball", "sphere.mesh");
 	ent->setMaterialName("Objects/Ball");
-//	ent->setNormaliseNormals(true);
 
-	ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
 
-	ent->getSubEntity(0)->setCustomParameter(0, Vector4(10.0f, 0.0f, 0.0f, 0.0f));
-	ent->getSubEntity(0)->setCustomParameter(1, Vector4(0.0f, 0.5f, 0.0f, 1.0f));
-	ent->getSubEntity(0)->setCustomParameter(2, Vector4(0.3f, 0.5f, 0.3f, 1.0f));
+	//ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
+
+	//ent->getSubEntity(0)->setCustomParameter(0, Vector4(10.0f, 0.0f, 0.0f, 0.0f));
+	//ent->getSubEntity(0)->setCustomParameter(1, Vector4(0.0f, 0.5f, 0.0f, 1.0f));
+	//ent->getSubEntity(0)->setCustomParameter(2, Vector4(0.3f, 0.5f, 0.3f, 1.0f));
 
 
 
@@ -285,11 +283,6 @@ void NetworkSenderApp::_createLight()
 	light->setPosition(Vector3(0, 100, 0));
 	light->setSpecularColour(ColourValue::White);
 	light->setDiffuseColour(ColourValue::White);
-	/*light->setAttenuation(300
-	, light->getAttenuationConstant() 
-	, light->getAttenuationLinear() 
-	, light->getAttenuationQuadric());
-	*/
 
 	mLightNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("light node");
 	mLightNode->attachObject(light);
@@ -315,13 +308,25 @@ void NetworkSenderApp::_createLight()
 
 }
 //------------------------------------------------------------------------------
+void NetworkSenderApp::_readConfigurationFromFile()
+{
+    ConfigFile cf;
+    cf.load("sender.cfg");
+
+    mIpAddress = cf.getSetting("Peer Address", "Network");
+    mUdpPort   =  cf.getSetting("Port", "Network");
+
+    mSamplingInterval = StringConverter::parseReal(cf.getSetting("Sampling Interval", "Network"));
+
+}
+//------------------------------------------------------------------------------
 void NetworkSenderApp::_initNetwork()
 {
 	mNetworkLog = LogManager::getSingleton().createLog("network.log");
 
 
 	mUdpResolver = new udp::resolver(mIOService);
-	mUdpQuery = new udp::resolver::query(udp::v4(), mIpAddress, "8888");
+	mUdpQuery = new udp::resolver::query(udp::v4(), mIpAddress, mUdpPort);
 	
     mUdpReceiverEndpoint = *(mUdpResolver->resolve(*mUdpQuery));
 

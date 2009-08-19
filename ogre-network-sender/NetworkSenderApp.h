@@ -19,7 +19,7 @@ class NetworkSenderApp: public ExampleApplication
 					  , public FrameListener
 {
 public:
-	NetworkSenderApp(const char*);
+	NetworkSenderApp();
 	virtual ~NetworkSenderApp(void);
 
 	bool frameStarted(const FrameEvent& evt);
@@ -30,6 +30,8 @@ protected:
 	void _createAxes(int);
 	void _createGrid(int);
 	void _createLight();
+
+    void _readConfigurationFromFile();
 
 	void _initNetwork();
 	void _sendPosition();
@@ -44,8 +46,9 @@ protected:
 	Vector3 mLastBallPosition, mCurrentSpeed;
 	bool mIsMoving, mHasMoved;
 
-	std::string mIpAddress;
+	std::string mIpAddress, mUdpPort;
 	boost::asio::io_service mIOService;
+    Real mSamplingInterval;
 
 	udp::resolver *mUdpResolver;
 	udp::resolver::query *mUdpQuery;
