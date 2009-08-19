@@ -42,7 +42,8 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 
 
     mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-    _sendPosition();
+    mNetworkLog->logMessage("time : "+StringConverter::toString(mTimeSinceLastUpdate));
+    //_sendPosition();
    
 
     Vector3 currentPos = mBallNode->getPosition();
@@ -61,9 +62,13 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
     {
         mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
         mLastBallPosition = currentPos;
-        mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-        if (mTimeSinceLastUpdate > 1./10)
+        //mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+        //
+        if (mTimeSinceLastUpdate > 1)
+        {
             _sendPosition();
+            mTimeSinceLastUpdate = 0;
+        }
          
     }
     
@@ -339,8 +344,6 @@ void NetworkSenderApp::_sendPosition()
 		mNetworkLog->logMessage(fmt.str());
 
         _sendPdu(pos, speed);
-
-		mTimeSinceLastUpdate = 0;
 	}
 }
 //------------------------------------------------------------------------------
