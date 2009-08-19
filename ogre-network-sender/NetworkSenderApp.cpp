@@ -103,13 +103,13 @@ void NetworkSenderApp::createScene()
 {
 
 
-	//const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-	//if (!caps->hasCapability(RSC_VERTEX_PROGRAM) || !(caps->hasCapability(RSC_FRAGMENT_PROGRAM)))
-	//{
-	//	OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Your card does not support vertex and fragment programs, so cannot "
-	//		"run this demo. Sorry!", 
-	//		"createScene");
-	//}
+	const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+	if (!caps->hasCapability(RSC_VERTEX_PROGRAM) || !(caps->hasCapability(RSC_FRAGMENT_PROGRAM)))
+	{
+		OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Your card does not support vertex and fragment programs, so cannot "
+			"run this demo. Sorry!", 
+			"createScene");
+	}
 
 	Viewport *vp = mWindow->getViewport(0);
 	vp->setBackgroundColour(ColourValue(0.7, 0.7, 0.7));
@@ -129,14 +129,14 @@ void NetworkSenderApp::createScene()
 
 	mBallNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Ball Node");
 	Entity *ent = mSceneMgr->createEntity("my ball", "sphere.mesh");
-	ent->setMaterialName("Objects/Ball");
+	//ent->setMaterialName("Objects/Ball");
 
 
-	//ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
+	ent->getSubEntity(0)->setMaterialName("Examples/CelShading");
 
-	//ent->getSubEntity(0)->setCustomParameter(0, Vector4(10.0f, 0.0f, 0.0f, 0.0f));
-	//ent->getSubEntity(0)->setCustomParameter(1, Vector4(0.0f, 0.5f, 0.0f, 1.0f));
-	//ent->getSubEntity(0)->setCustomParameter(2, Vector4(0.3f, 0.5f, 0.3f, 1.0f));
+	ent->getSubEntity(0)->setCustomParameter(0, Vector4(10.0f, 0.0f, 0.0f, 0.0f));
+	ent->getSubEntity(0)->setCustomParameter(1, Vector4(0.0f, 0.5f, 0.0f, 1.0f));
+	ent->getSubEntity(0)->setCustomParameter(2, Vector4(0.3f, 0.5f, 0.3f, 1.0f));
 
 
 
