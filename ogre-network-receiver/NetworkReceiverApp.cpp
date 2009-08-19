@@ -187,7 +187,7 @@ void NetworkReceiverApp::_startThread()
 void NetworkReceiverApp::operator()()
 {
 
-	Timer timer;
+	//Timer timer;
 	mRunning = true;
 	mUdpRemotePoint = udp::endpoint(udp::v4(), 8888);
 	mUdpSocket = new udp::socket(mIOService, mUdpRemotePoint);
@@ -200,7 +200,7 @@ void NetworkReceiverApp::operator()()
 		//if (timer.getMillisecondsCPU() >= 10)
 		//{
 		//	_readPosition();
-		//	timer.reset();
+		//	//timer.reset();
 		//}
         _readPosition();
 		
@@ -216,9 +216,9 @@ void NetworkReceiverApp::_readPosition()
 
 
 
-    boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
-    fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;
-    mNetworkLog->logMessage(fmt.str());
+    //boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
+    //fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;
+    //mNetworkLog->logMessage(fmt.str());
 
 	if (ec)
 		mConnected = false;

@@ -42,7 +42,7 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 
 
     mTimeSinceLastUpdate += evt.timeSinceLastFrame;
-    mNetworkLog->logMessage("time : "+StringConverter::toString(mTimeSinceLastUpdate));
+    //mNetworkLog->logMessage("time : "+StringConverter::toString(mTimeSinceLastUpdate));
     //_sendPosition();
    
 
