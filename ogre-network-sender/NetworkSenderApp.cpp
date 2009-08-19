@@ -315,7 +315,7 @@ void NetworkSenderApp::_readConfigurationFromFile()
     cf.load("sender.cfg");
 
     mIpAddress = cf.getSetting("Peer Address", "Network");
-    mUdpPort   =  cf.getSetting("Port", "Network");
+    mUdpPort   =  cf.getSetting("UDP Port", "Network");
 
     mSamplingInterval = StringConverter::parseReal(cf.getSetting("Sampling Interval", "Network"));
 
