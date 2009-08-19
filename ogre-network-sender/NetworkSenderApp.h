@@ -40,9 +40,6 @@ protected:
 protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
 	AnimationState *mAnimState, *mAnimState2;
-    
-    Vector3 mLastBallPosition, mCurrentSpeed;
-    bool mIsMoving;
 
 	Vector3 mLastBallPosition, mCurrentSpeed;
 	bool mIsMoving, mHasMoved;
