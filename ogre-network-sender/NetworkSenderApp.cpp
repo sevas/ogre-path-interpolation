@@ -346,8 +346,8 @@ void NetworkSenderApp::_sendPdu(const Vector3 &_pos, const Vector3 &_speed)
 {
     char arr[6*sizeof(Real)];
     
-    memcpy(arr,   _pos.ptr(),   3*sizeof(Real));
-    memcpy(arr+3, _speed.ptr(), 3*sizeof(Real));
+    memcpy(arr,                 _pos.ptr(),   3*sizeof(Real));
+    memcpy(arr+3*sizeof(Real),  _speed.ptr(), 3*sizeof(Real));
     
     mUdpSocket->send_to(boost::asio::buffer(arr, 6*sizeof(Real))
                         ,mUdpReceiverEndpoint
