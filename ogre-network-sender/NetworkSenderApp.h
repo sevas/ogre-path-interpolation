@@ -58,7 +58,7 @@ protected:
 	boost::system::error_code mSocketError;
 	bool mConnected;
 	Timer mTimer;
-	Real mTimeSinceLastUpdate;
+	Real mTimeSinceLastUpdate, mLastTimeDelta;
 	Log *mNetworkLog;
 
 	int mRate;

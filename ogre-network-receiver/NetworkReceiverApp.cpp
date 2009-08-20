@@ -266,8 +266,9 @@ void NetworkReceiverApp::_predictSplineControlPolygon(const Vector3 &_startPos
     mControlPolygon.p1 = _startPos;
     mControlPolygon.p4 = _targetPos;
 
-    mControlPolygon.p2 = _startPos  + _startSpeed*0.008;
-    mControlPolygon.p3 = _targetPos - _targetSpeed*0.008;
+    mControlPolygon.p2 = _startPos  + _startSpeed;
+    mControlPolygon.p3 = _targetPos - _targetSpeed;
+    
 }
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_readPdu(Vector3& _oPos, Vector3& _oSpeed, boost::system::error_code &_error)

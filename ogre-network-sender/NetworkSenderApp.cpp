@@ -11,7 +11,8 @@
 
 Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
 {
-    return (_p - _q) * _dt;
+    return (_p - _q);
+    
 }
 
 
@@ -26,6 +27,7 @@ NetworkSenderApp::NetworkSenderApp()
 	,mIsMoving(false)
     ,mHasMoved(false)
     ,mSamplingInterval(1.0)
+    ,mLastTimeDelta(0.0)
 {
     mTitle = "Sender";
 }
@@ -57,12 +59,14 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
             mHasMoved = true;
             mIsMoving = true;
             mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+            mLastTimeDelta = evt.timeSinceLastFrame;
             mLastBallPosition = currentPos;
         }
     }
     else
     {
         mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+        mLastTimeDelta = evt.timeSinceLastFrame;
         mLastBallPosition = currentPos;
         
         if (mTimeSinceLastUpdate > mSamplingInterval)
@@ -345,9 +349,9 @@ void NetworkSenderApp::_sendPosition()
         Vector3 pos = mBallNode->getPosition();
         Vector3 speed = mCurrentSpeed;
 
-		//boost::format fmt("[new pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
-		//fmt % pos.x % pos.y % pos.z % speed.x % speed.y % speed.z;
-		//mNetworkLog->logMessage(fmt.str());
+		boost::format fmt("[new pdu] position (%.2f  %.2f  %.2f) speed (%.3f  %.3f  %.3f) dt %.6f");
+		fmt % pos.x % pos.y % pos.z % speed.x % speed.y % speed.z % mLastTimeDelta;
+		mNetworkLog->logMessage(fmt.str());
 
         _sendPdu(pos, speed);
 	}
