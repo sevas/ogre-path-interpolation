@@ -9,8 +9,14 @@ NetworkReceiverApp::NetworkReceiverApp(void)
 	:mAnimState2(NULL)
 	,mThread(0)
 	,mUdpSocket(0)
+    ,mCurrentInterpolationTime(0)
+    ,mIsMoving(false)
+    ,mHasMoved(false)
+    ,mCurrentStartPosition(Vector3::ZERO)
+    ,mCurrentStartSpeed(Vector3::ZERO)
 {
     mTitle = "Receiver";
+    mPathSpline.clear();
 }
 //------------------------------------------------------------------------------
 NetworkReceiverApp::~NetworkReceiverApp(void)
@@ -23,6 +29,14 @@ bool NetworkReceiverApp::frameStarted(const FrameEvent& evt)
 {
 	if (mAnimState2)
 		mAnimState2->addTime(evt.timeSinceLastFrame);
+
+    if (mIsMoving)
+    {
+        //mPathSpline.interpolate(mCurrentInterpolationTime);
+        //mBallNode->setPosition(mPathSpline.interpolate(mCurrentInterpolationTime));
+        mCurrentInterpolationTime += .08;
+    }
+
 	return true;
 }
 //------------------------------------------------------------------------------
@@ -196,13 +210,7 @@ void NetworkReceiverApp::operator()()
 
 	while(mRunning)
 	{
-		//if (timer.getMillisecondsCPU() >= 10)
-		//{
-		//	_readPosition();
-		//	//timer.reset();
-		//}
-        _readPosition();
-		
+        _readPosition();	
 	}
 }
 //------------------------------------------------------------------------------
@@ -213,21 +221,53 @@ void NetworkReceiverApp::_readPosition()
     
     _readPdu(position, speed, ec);
 
-    //boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
-    //fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;
-    //mNetworkLog->logMessage(fmt.str());
+    boost::format fmt("[received pdu] position (%.2f  %.2f  %.2f)   speed (%.2f  %.2f  %.2f)");
+    fmt % position.x % position.y % position.z % speed.x % speed.y % speed.z;
+    mNetworkLog->logMessage(fmt.str());
+
 
 	if (ec)
 		mConnected = false;
+    else if(!mHasMoved)
+    {
 
+        //mBallNode->setPosition(position);
+        mCurrentStartPosition = position;
+        mCurrentStartSpeed = speed;
+        mHasMoved = true;
+    }
     else
     {
-	 /*   if (position.distance(Vector3::ZERO) < 500)
-		    mBallNode->setPosition(position);
-	    else
-		    mBallNode->setPosition(Vector3(0, 100, 0));*/
-        mBallNode->setPosition(position);
+        mCurrentStartPosition = mCurrentTargetPosition;
+        mCurrentStartSpeed = mCurrentTargetSpeed;
+        mCurrentTargetPosition = position;
+        mCurrentTargetSpeed = speed;
+
+        _predictSplineControlPolygon(mCurrentStartPosition, mCurrentStartSpeed
+            ,mCurrentTargetPosition, -mCurrentTargetSpeed);
+
+        mPathSpline.clear();
+        mPathSpline.addPoint(mControlPolygon.p1);
+        mPathSpline.addPoint(mControlPolygon.p2);
+        mPathSpline.addPoint(mControlPolygon.p3);
+        mPathSpline.addPoint(mControlPolygon.p4);
+        //mPathSpline.setAutoCalculate(true);
+        mPathSpline.recalcTangents();
+        mCurrentInterpolationTime = 0;
+        mIsMoving = true;
     }
+}
+//------------------------------------------------------------------------------
+void NetworkReceiverApp::_predictSplineControlPolygon(const Vector3 &_startPos
+                                                     ,const Vector3 &_startSpeed
+                                                     ,const Vector3 &_targetPos
+                                                     ,const Vector3 &_targetSpeed)
+{
+    mControlPolygon.p1 = _startPos;
+    mControlPolygon.p4 = _targetPos;
+
+    mControlPolygon.p2 = _startPos  + _startSpeed*0.008;
+    mControlPolygon.p3 = _targetPos - _targetSpeed*0.008;
 }
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_readPdu(Vector3& _oPos, Vector3& _oSpeed, boost::system::error_code &_error)

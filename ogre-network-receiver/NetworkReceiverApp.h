@@ -22,6 +22,13 @@ using boost::asio::ip::udp;
 class NetworkReceiverApp: public ExampleApplication
 					  , public FrameListener
 {
+protected:
+    typedef struct
+    {
+        Vector3 p1, p2, p3, p4;
+    } ControlPolygon;
+
+
 public:
 	NetworkReceiverApp(void);
 	virtual ~NetworkReceiverApp(void);
@@ -37,9 +44,10 @@ protected:
 	void _createLight();
 
 	void _startThread();
-	void  _readPosition();
-    void  _readPdu(Vector3&, Vector3&,  boost::system::error_code&);
-	void  _readFloat(udp::socket&,  boost::system::error_code&, float&);
+	void _readPosition();
+    void _readPdu(Vector3&, Vector3&,  boost::system::error_code&);
+	void _readFloat(udp::socket&,  boost::system::error_code&, float&);
+    void _predictSplineControlPolygon(const Vector3&, const Vector3&, const Vector3 &, const Vector3 &);
 
 protected:
 	SceneNode *mGridNode, *mBallNode, *mLightNode;
@@ -53,5 +61,12 @@ protected:
 	udp::endpoint mUdpRemotePoint;
 	boost::system::error_code mSocketError;
 	
+    Ogre::SimpleSpline mPathSpline;
+    Ogre::Real mCurrentInterpolationTime;
+    Ogre::Vector3 mCurrentStartPosition, mCurrentStartSpeed;
+    Ogre::Vector3 mCurrentTargetPosition, mCurrentTargetSpeed;
+    ControlPolygon mControlPolygon;
+    bool mIsMoving, mHasMoved;
+
     Ogre::Log *mNetworkLog;
 };

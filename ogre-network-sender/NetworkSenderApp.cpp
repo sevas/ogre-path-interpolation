@@ -11,7 +11,7 @@
 
 Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
 {
-    return (_p - _q) / _dt;
+    return (_p - _q) * _dt;
 }
 
 
