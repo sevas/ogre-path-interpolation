@@ -47,7 +47,7 @@ protected:
 	void _readPosition();
     void _readPdu(Vector3&, Vector3&,  boost::system::error_code&);
 	void _readFloat(udp::socket&,  boost::system::error_code&, float&);
-    void _predictSplineControlPolygon(const Vector3&, const Vector3&, const Vector3 &, const Vector3 &);
+    void _predictSplineControlPolygon(const Vector3, const Vector3, const Vector3 , const Vector3 );
     void _redrawControlPolygon();
 
 protected:
@@ -64,6 +64,7 @@ protected:
 	
     Ogre::SimpleSpline mPathSpline;
     Ogre::Real mCurrentInterpolationTime;
+    Ogre::uint16 mCurrentInterpolationStep;
     Ogre::Vector3 mCurrentStartPosition, mCurrentStartSpeed;
     Ogre::Vector3 mCurrentTargetPosition, mCurrentTargetSpeed;
     bool mIsMoving, mHasMoved;

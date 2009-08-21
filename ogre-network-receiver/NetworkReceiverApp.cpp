@@ -3,6 +3,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <boost/format.hpp>
+
 #include "NetworkReceiverApp.h"
 
 NetworkReceiverApp::NetworkReceiverApp(void)
@@ -14,6 +16,7 @@ NetworkReceiverApp::NetworkReceiverApp(void)
     ,mHasMoved(false)
     ,mCurrentStartPosition(Vector3::ZERO)
     ,mCurrentStartSpeed(Vector3::ZERO)
+    ,mCurrentInterpolationStep(0)
 {
     mTitle = "Receiver";
     mPathSpline.clear();
@@ -36,10 +39,11 @@ bool NetworkReceiverApp::frameStarted(const FrameEvent& evt)
     {
         //mPathSpline.interpolate(mCurrentInterpolationTime);
         mBallNode->setPosition(mPathSpline.interpolate(mCurrentInterpolationTime));
-        if (mCurrentInterpolationTime + evt.timeSinceLastFrame / 0.5 < 1.0)
+        if ((mCurrentInterpolationTime + (evt.timeSinceLastFrame / 0.5)) < 1.0)
         {
-            mNetworkLog->logMessage(Ogre::StringConverter::toString(mCurrentInterpolationTime));
-            mCurrentInterpolationTime += evt.timeSinceLastFrame / 0.5 ;
+            mNetworkLog->logMessage(boost::str(boost::format("[%d] %f") % mCurrentInterpolationStep % mCurrentInterpolationTime));
+            mCurrentInterpolationTime += (evt.timeSinceLastFrame / 0.5) ;
+            mCurrentInterpolationStep++;
         }
     }
 
@@ -280,21 +284,22 @@ void NetworkReceiverApp::_readPosition()
 
         mPathSpline.recalcTangents();
         mCurrentInterpolationTime = 0;
+        mCurrentInterpolationStep=0;
         _redrawControlPolygon();
         mIsMoving = true;
     }
 }
 //------------------------------------------------------------------------------
-void NetworkReceiverApp::_predictSplineControlPolygon(const Vector3 &_startPos
-                                                     ,const Vector3 &_startSpeed
-                                                     ,const Vector3 &_targetPos
-                                                     ,const Vector3 &_targetSpeed)
+void NetworkReceiverApp::_predictSplineControlPolygon(const Vector3 _startPos
+                                                     ,const Vector3 _startSpeed
+                                                     ,const Vector3 _targetPos
+                                                     ,const Vector3 _targetSpeed)
 {
     mControlPolygon.p1 = _startPos;
     mControlPolygon.p4 = _targetPos;
 
-    mControlPolygon.p2 = _startPos  + _startSpeed;
-    mControlPolygon.p3 = _targetPos - _targetSpeed;
+    mControlPolygon.p2 = _startPos  + _startSpeed * 0.5 / 3;
+    mControlPolygon.p3 = _targetPos - _targetSpeed * 0.5 / 3;
     
 }
 //------------------------------------------------------------------------------
