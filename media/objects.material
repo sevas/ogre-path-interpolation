@@ -47,7 +47,7 @@ material Objects/DynamicLinePoint
 }
 
 
-material Objects/PathPoint
+material Objects/StartPathPoint
 {
     technique
     {
@@ -60,7 +60,7 @@ material Objects/PathPoint
     }
 }
 
-material Objects/ControlPoint
+material Objects/StartControlPoint
 {
     technique
     {
@@ -71,6 +71,32 @@ material Objects/ControlPoint
             ambient 0.0  0.5  0.5  1.0
         }
     }
+}
 
+material Objects/EndPathPoint
+{
+    technique
+    {
+        pass
+        {
+            lightning on
+            diffuse 0.5  0.5  0.5  1.0
+            ambient 0.5  0.0  0.0  1.0
+        }
+    }
+}
+
+
+material Objects/EndControlPoint
+{
+    technique
+    {
+        pass
+        {
+            lightning on
+            diffuse 0.5  0.5  0.5  1.0
+            ambient 0.5  0.5  0.0  1.0
+        }
+    }
 }
 

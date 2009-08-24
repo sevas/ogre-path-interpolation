@@ -37,11 +37,15 @@ bool NetworkReceiverApp::frameStarted(const FrameEvent& evt)
 
     if (mIsMoving)
     {
-        //mPathSpline.interpolate(mCurrentInterpolationTime);
-        mBallNode->setPosition(mPathSpline.interpolate(mCurrentInterpolationTime));
+        //Vector3 newPos = mPathSpline.interpolate(mCurrentInterpolationTime);
+        Vector3 newPos = mPathSpline2.evaluate(mCurrentInterpolationTime);
+        mBallNode->setPosition(newPos);
         if ((mCurrentInterpolationTime + (evt.timeSinceLastFrame / 0.5)) < 1.0)
         {
-            mNetworkLog->logMessage(boost::str(boost::format("[%d] %f") % mCurrentInterpolationStep % mCurrentInterpolationTime));
+            mNetworkLog->logMessage(boost::str(boost::format("[%d] %f : (%.2f, %.2f, %.2f)") 
+                                                            % mCurrentInterpolationStep 
+                                                            % mCurrentInterpolationTime
+                                                            % newPos.x % newPos.y % newPos.z));
             mCurrentInterpolationTime += (evt.timeSinceLastFrame / 0.5) ;
             mCurrentInterpolationStep++;
         }
@@ -103,11 +107,22 @@ void NetworkReceiverApp::createScene()
         Ogre::Entity *pointSphere;
         mControlPoints[i]= mSceneMgr->getRootSceneNode()->createChildSceneNode("Control Point "+Ogre::StringConverter::toString(i));
         pointSphere = mSceneMgr->createEntity("Control Point "+Ogre::StringConverter::toString(i), "geosphere4500.mesh");
-        if(i == 0 || i == 3)
-            pointSphere->setMaterialName("Objects/PathPoint");
-        else
-            pointSphere->setMaterialName("Objects/ControlPoint");
-
+        
+        switch(i)
+        {
+        case 0:
+            pointSphere->setMaterialName("Objects/StartPathPoint");
+            break;
+        case 1:
+            pointSphere->setMaterialName("Objects/StartControlPoint");
+            break;
+        case 2:
+            pointSphere->setMaterialName("Objects/EndPathPoint");
+            break;
+        case 3:
+            pointSphere->setMaterialName("Objects/EndControlPoint");
+            break;
+        }
         float w = pointSphere->getBoundingBox().getSize().x;
         float ws = 1.0 / w;
 
@@ -273,16 +288,35 @@ void NetworkReceiverApp::_readPosition()
         mCurrentTargetPosition = position;
         mCurrentTargetSpeed = speed;
 
+            
+        boost::format fmt2("[new path] %s : (%.2f %.2f %.2f) (%.2f %.2f %.2f)");
+        fmt2 % "start" % mCurrentStartPosition.x % mCurrentStartPosition.y % mCurrentStartPosition.z
+                       % mCurrentStartSpeed.x    % mCurrentStartSpeed.y   % mCurrentStartSpeed.z;
+        mNetworkLog->logMessage(fmt2.str());
+        fmt2 % "stop" % mCurrentTargetPosition.x % mCurrentTargetPosition.y % mCurrentTargetPosition.z
+                       % mCurrentTargetSpeed.x    % mCurrentTargetSpeed.y   % mCurrentTargetSpeed.z;
+        mNetworkLog->logMessage(fmt2.str());
+
+
+        mPathSpline2.setStartPoint(mCurrentStartPosition, mCurrentStartSpeed);
+        mPathSpline2.setEndPoint(mCurrentTargetPosition, mCurrentTargetSpeed);
+        mPathSpline2.calcControlPoints();
+
+        
+
         _predictSplineControlPolygon(mCurrentStartPosition, mCurrentStartSpeed
                                     ,mCurrentTargetPosition, mCurrentTargetSpeed);
 
-        mPathSpline.clear();
-        mPathSpline.addPoint(mControlPolygon.p1);
-        mPathSpline.addPoint(mControlPolygon.p2);
-        mPathSpline.addPoint(mControlPolygon.p3);
-        mPathSpline.addPoint(mControlPolygon.p4);
+        //mPathSpline.clear();
 
-        mPathSpline.recalcTangents();
+        //mPathSpline.addPoint(mControlPolygon.p1);
+        //mPathSpline.addPoint(mControlPolygon.p2);
+        //mPathSpline.addPoint(mControlPolygon.p3);
+        //mPathSpline.addPoint(mControlPolygon.p4);
+
+        //mPathSpline.recalcTangents();
+
+
         mCurrentInterpolationTime = 0;
         mCurrentInterpolationStep=0;
         _redrawControlPolygon();
@@ -298,20 +332,20 @@ void NetworkReceiverApp::_predictSplineControlPolygon(const Vector3 _startPos
     mControlPolygon.p1 = _startPos;
     mControlPolygon.p4 = _targetPos;
 
-    mControlPolygon.p2 = _startPos  + _startSpeed * 0.5 / 3;
-    mControlPolygon.p3 = _targetPos - _targetSpeed * 0.5 / 3;
+    mControlPolygon.p2 = _startPos  + _startSpeed;
+    mControlPolygon.p3 = _targetPos - _targetSpeed;
     
 }
 //------------------------------------------------------------------------------
 void NetworkReceiverApp::_redrawControlPolygon()
 {
     //mCurrentPath->clear();
-    //mCurrentPath->begin("Objects/DynamicLine", Ogre::RenderOperation::OT_LINE_STRIP);
-    //mCurrentPath->position(mControlPolygon.p1);
-    //mCurrentPath->position(mControlPolygon.p2);
-    //mCurrentPath->position(mControlPolygon.p3);
-    //mCurrentPath->position(mControlPolygon.p4);
-    //mCurrentPath->end();
+    mCurrentPath->begin("Objects/DynamicLine", Ogre::RenderOperation::OT_LINE_STRIP);
+    mCurrentPath->position(mControlPolygon.p1);
+    mCurrentPath->position(mControlPolygon.p2);
+    mCurrentPath->position(mControlPolygon.p3);
+    mCurrentPath->position(mControlPolygon.p4);
+    mCurrentPath->end();
 
     mControlPoints[0]->setPosition(mControlPolygon.p1);
     mControlPoints[1]->setPosition(mControlPolygon.p2);

@@ -13,6 +13,8 @@
 
 #include "ExampleApplication.h"
 
+#include "CubicSpline.h"
+
 using namespace Ogre;
 using boost::asio::ip::udp;
 
@@ -71,6 +73,8 @@ protected:
     ControlPolygon mControlPolygon;
     std::vector<Ogre::SceneNode*> mControlPoints;
     Ogre::ManualObject *mCurrentPath;
+
+    CubicSpline mPathSpline2;
 
     Ogre::Log *mNetworkLog;
 };
