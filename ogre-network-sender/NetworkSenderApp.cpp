@@ -11,7 +11,9 @@
 
 Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
 {
-    return (_p - _q);
+    return (_p - _q) * _dt;
+
+    
     
 }
 
@@ -27,6 +29,7 @@ NetworkSenderApp::NetworkSenderApp()
 	,mIsMoving(false)
     ,mHasMoved(false)
     ,mSamplingInterval(1.0)
+    ,mTimeSinceLastSpeedSample(0.0)
     ,mLastTimeDelta(0.0)
 {
     mTitle = "Sender";
@@ -46,6 +49,8 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
 
 
     mTimeSinceLastUpdate += evt.timeSinceLastFrame;
+    mTimeSinceLastSpeedSample += evt.timeSinceLastFrame;
+    
     //mNetworkLog->logMessage("time : "+StringConverter::toString(mTimeSinceLastUpdate));
     //_sendPosition();
    
@@ -58,22 +63,32 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
         {
             mHasMoved = true;
             mIsMoving = true;
-            mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+            //mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
+            mCurrentSpeed =  0.33 * (currentPos - mLastBallPosition);
             mLastTimeDelta = evt.timeSinceLastFrame;
             mLastBallPosition = currentPos;
         }
     }
     else
     {
-        mCurrentSpeed = getDerive(currentPos, mLastBallPosition, evt.timeSinceLastFrame);
-        mLastTimeDelta = evt.timeSinceLastFrame;
-        mLastBallPosition = currentPos;
-        
-        if (mTimeSinceLastUpdate > mSamplingInterval)
+        if(mTimeSinceLastUpdate > mSamplingInterval)
         {
+             mCurrentSpeed =  0.33 * (currentPos - mLastBallPosition );
+            mLastBallPosition = currentPos;
             _sendPosition();
             mTimeSinceLastUpdate = 0;
         }
+        //else if (mTimeSinceLastSpeedSample > mSamplingInterval/10)
+        //{
+        //    mCurrentSpeed = getDerive(currentPos, mLastBallPosition, mSamplingInterval/10);
+        //    mCurrentSpeed *= (mSamplingInterval) / 3;
+        //    mLastTimeDelta = evt.timeSinceLastFrame;
+        //    mLastBallPosition = currentPos;
+        //    mTimeSinceLastSpeedSample = 0.0;
+        //    
+        //}
+
+
          
     }
    	return true;
@@ -150,7 +165,7 @@ void NetworkSenderApp::createScene()
 	mBallNode->attachObject(ent);
 	mBallNode->setScale(ws, ws, ws);
 
-	float totalTime = 4;
+	float totalTime = 8;
 	float halfTime  = totalTime/2;
 
 	Animation *anim = mSceneMgr->createAnimation("bouncing ball", totalTime);
