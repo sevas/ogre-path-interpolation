@@ -59,6 +59,7 @@ protected:
 	bool mConnected;
 	Timer mTimer;
 	Real mTimeSinceLastUpdate, mLastTimeDelta;
+    Real mTimeSinceLastSpeedSample;
 	Log *mNetworkLog;
 
 	int mRate;
