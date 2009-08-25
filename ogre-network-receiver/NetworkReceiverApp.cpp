@@ -288,14 +288,14 @@ void NetworkReceiverApp::_readPosition()
         mCurrentTargetPosition = position;
         mCurrentTargetSpeed = speed;
 
-            
-        boost::format fmt2("[new path] %s : (%.2f %.2f %.2f) (%.2f %.2f %.2f)");
-        fmt2 % "start" % mCurrentStartPosition.x % mCurrentStartPosition.y % mCurrentStartPosition.z
-                       % mCurrentStartSpeed.x    % mCurrentStartSpeed.y   % mCurrentStartSpeed.z;
-        mNetworkLog->logMessage(fmt2.str());
-        fmt2 % "stop" % mCurrentTargetPosition.x % mCurrentTargetPosition.y % mCurrentTargetPosition.z
-                       % mCurrentTargetSpeed.x    % mCurrentTargetSpeed.y   % mCurrentTargetSpeed.z;
-        mNetworkLog->logMessage(fmt2.str());
+        //    
+        //boost::format fmt2("[new path] %s : (%.2f %.2f %.2f) (%.2f %.2f %.2f)");
+        //fmt2 % "start" % mCurrentStartPosition.x % mCurrentStartPosition.y % mCurrentStartPosition.z
+        //               % mCurrentStartSpeed.x    % mCurrentStartSpeed.y   % mCurrentStartSpeed.z;
+        //mNetworkLog->logMessage(fmt2.str());
+        //fmt2 % "stop" % mCurrentTargetPosition.x % mCurrentTargetPosition.y % mCurrentTargetPosition.z
+        //               % mCurrentTargetSpeed.x    % mCurrentTargetSpeed.y   % mCurrentTargetSpeed.z;
+        //mNetworkLog->logMessage(fmt2.str());
 
 
         mPathSpline2.setStartPoint(mCurrentStartPosition, mCurrentStartSpeed);
