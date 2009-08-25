@@ -9,9 +9,9 @@
 #include <boost/format.hpp>
 
 
-Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt)
+Vector3 getDerive(const Vector3 &_p, const Vector3 &_q, const Real &_dt, const Real &_T)
 {
-    return (_p - _q) * _dt;
+    return (_p - _q) * (_T/(3*_dt));
 
     
     
@@ -51,9 +51,6 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
     mTimeSinceLastUpdate += evt.timeSinceLastFrame;
     mTimeSinceLastSpeedSample += evt.timeSinceLastFrame;
     
-    //mNetworkLog->logMessage("time : "+StringConverter::toString(mTimeSinceLastUpdate));
-    //_sendPosition();
-   
 
     Vector3 currentPos = mBallNode->getPosition();
 
@@ -73,7 +70,9 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
     {
         if(mTimeSinceLastUpdate > mSamplingInterval)
         {
-             mCurrentSpeed =  0.33 * (currentPos - mLastBallPosition );
+             mCurrentSpeed = getDerive(currentPos, mLastBallPosition
+                                      ,evt.timeSinceLastFrame
+                                      ,mSamplingInterval);
             mLastBallPosition = currentPos;
             _sendPosition();
             mTimeSinceLastUpdate = 0;
@@ -87,10 +86,10 @@ bool NetworkSenderApp::frameStarted(const FrameEvent& evt)
         //    mTimeSinceLastSpeedSample = 0.0;
         //    
         //}
-
-
-         
     }
+
+    mLastBallPosition = currentPos;
+
    	return true;
 }
 //------------------------------------------------------------------------------
